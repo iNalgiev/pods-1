@@ -268,7 +268,7 @@ class PodsUI {
 	/**
 	 * @var int
 	 */
-	public $limit = 25;
+	public $limit = 100;
 
 	/**
 	 * @var int
@@ -3765,6 +3765,138 @@ class PodsUI {
 			<?php
 			return false;
 		}
+		?>
+		<style type="text/css">
+		<?php
+			 if($_GET['page'] == 'pods-manage-context' || $_GET['page'] == 'pods-manage-functie_website') {
+                    echo "th.manage-column.column-Toelichting, td.pods-ui-col-field-toelichting {
+                    width: 500px;
+                }
+                th.manage-column.column-Volgorde {
+                    width: 100px;
+                }
+
+                th.manage-column.column-Naam, th.manage-column.column-Opmerking {
+                    width: 250px;
+                }
+                ";
+                }
+		?>
+
+		<?php
+		$numberOfColumns = count($this->fields['manage']);
+			if($numberOfColumns >= 10) {
+				echo "table {
+				border-collapse: collapse;
+				width: 300px;
+				overflow-x: scroll;
+				display: block;
+			}
+			thead {
+				/*background-color: #EFEFEF;*/
+			}
+			thead,
+			tbody {
+				display: block;
+			}
+			tbody {
+				overflow-y: scroll;
+				overflow-x: hidden;
+				height:  calc(100vh - 100px);;
+			}
+			td:not(.check-column),
+			th:not(.check-column) {
+				min-width: 200px;
+				max-width: 200px;
+				height: 25px;
+				/*border: dashed 1px lightblue;*/
+				overflow: hidden;
+				text-overflow: ellipsis;
+			}
+			.widefat td, .widefat th {
+				padding: 5px 5px;
+			}
+			.widefat th.sortable, .widefat th.sorted {
+				padding: 5px 5px;
+			}
+			th.manage-column.column-ID, td.pods-ui-col-field-id {
+				min-width: 50px !important;
+			}";
+		}
+		?>
+        </style>
+        <script type="text/javascript">
+
+		<?php if($_GET['page'] == 'pods-manage-resource') { ?>
+			jQuery(document).ready(function(){
+
+                jQuery('html, body').animate({
+                    scrollTop: jQuery('#the-list').offset().top - 80
+                }, 500);
+
+            });
+		<?php } ?>
+
+            function docReady(fn) {
+                // see if DOM is already available
+                if (document.readyState === "complete" || document.readyState === "interactive") {
+                    // call on next available tick
+                    setTimeout(fn, 1);
+                } else {
+                    document.addEventListener("DOMContentLoaded", fn);
+                }
+            }
+            function showMore(id){
+                document.getElementById(id+'Overflow').className='';
+                document.getElementById(id+'MoreLink').className='hidden';
+                document.getElementById(id+'LessLink').className='';
+            }
+
+            function showLess(id){
+                document.getElementById(id+'Overflow').className='hidden';
+                document.getElementById(id+'MoreLink').className='';
+                document.getElementById(id+'LessLink').className='hidden';
+            }
+
+            docReady(function() {
+                // DOM is loaded and ready for manipulation here
+                /*var $table = jQuery('table#table-1');
+                $table.floatThead({
+                    top: function($table) {
+                        return 30;
+                    }
+                });*/
+				jQuery('table').on('scroll', function() {
+					jQuery("table > *").width(jQuery("table").width() + jQuery("table").scrollLeft());
+				});
+
+                //var html = document.getElementsByClassName("pods-ui-col-field-internetadres");
+                // console.log(html);
+
+				String.prototype.trunc = String.prototype.trunc ||
+					function(n){
+					return (this.length > n) ? this.substr(0, n): this;
+				};
+
+                var len = 200;
+                var shrinkables = document.getElementsByClassName('shrinkable');
+
+                if (shrinkables.length > 0) {
+                    for (var i = 0; i < shrinkables.length; i++) {
+                        var fullText = shrinkables[i].innerHTML;
+                        if (fullText.length > len) {
+							var fullText2 = fullText.replace(";;", ";");
+                            var trunc = fullText2.trunc(len);
+                            var remainder = "";
+                            var id = shrinkables[i].id;
+                            remainder = fullText2.substring(len, fullText2.length);
+                            shrinkables[i].innerHTML = '<span>' + trunc + '<span class="hidden" id="' + id + 'Overflow">' + remainder + '</span></span>&nbsp;<a id="' + id + 'MoreLink" href="#!" onclick="showMore(\'' + id + '\');">More</a><a class="hidden" href="#!" id="' + id + 'LessLink" onclick="showLess(\'' + id + '\');">Less</a>';
+                        }
+                    }
+                }
+            });
+        </script>
+<?php
 		if ( true === $reorder && ! in_array( 'reorder', $this->actions_disabled ) && false !== $this->reorder['on'] ) {
 
 			?>
@@ -3858,7 +3990,7 @@ class PodsUI {
 
 							$column_classes = array(
 								'manage-column',
-								'column-' . $id,
+								'column-' . esc_html($attributes['label']),
 							);
 
 							// Merge with the classes taken from the UI call
@@ -3911,64 +4043,7 @@ class PodsUI {
 				<?php
 				if ( 6 < $this->total_found ) {
 					?>
-					<tfoot>
-					<tr>
-						<?php
-						if ( ! empty( $this->actions_bulk ) ) {
-							?>
-							<th scope="col" class="manage-column column-cb check-column"><input type="checkbox" /></th>
-							<?php
-						}
 
-						if ( ! empty( $fields ) ) {
-							foreach ( $fields as $field => $attributes ) {
-								$dir = 'ASC';
-								if ( $field == $this->orderby ) {
-									$current_sort = 'desc';
-									if ( 'ASC' === $this->orderby_dir ) {
-										$dir          = 'DESC';
-										$current_sort = 'asc';
-									}
-								}
-
-								$width = '';
-
-								if ( isset( $attributes['width'] ) && ! empty( $attributes['width'] ) ) {
-									$width = ' style="width: ' . esc_attr( $attributes['width'] ) . '"';
-								}
-
-								if ( $fields[ $field ]['sortable'] ) {
-									?>
-									<th scope="col" class="manage-column column-<?php esc_attr_e( $id ); ?> sortable <?php esc_attr_e( $current_sort ); ?>"<?php echo $width; ?>>
-										<a href="
-										<?php
-										echo esc_url_raw(
-											pods_query_arg(
-												array(
-													'orderby' . $this->num     => $field,
-													'orderby_dir' . $this->num => $dir,
-												), array(
-													'limit' . $this->num,
-													'search' . $this->num,
-													'pg' . $this->num,
-													'page',
-												), $this->exclusion()
-											)
-										);
-										?>
-										"><span><?php esc_html_e( $attributes['label'] ); ?></span><span class="sorting-indicator"></span></a>
-									</th>
-									<?php
-								} else {
-									?>
-									<th scope="col" class="manage-column column-<?php esc_attr_e( $id ); ?>"<?php echo $width; ?>><?php esc_html_e( $attributes['label'] ); ?></th>
-									<?php
-								}//end if
-							}//end foreach
-						}//end if
-						?>
-					</tr>
-					</tfoot>
 					<?php
 				}//end if
 				?>
@@ -4295,8 +4370,15 @@ class PodsUI {
 									<td class="<?php esc_attr_e( implode( ' ', $css_classes ) ); ?>" data-colname="<?php esc_attr_e( $attributes['label'] ); ?>">
 										<span>
 										<?php
-										/* Escaped above for non-HTML types */
-											echo $row_value;
+											/* Escaped above for non-HTML types */
+											if($attributes['name'] == "url") {
+												echo "<a href='".$row_value."' target='_blank'>".$row_value."</a>";
+											} else if ($attributes['name'] == "toelichting" || $attributes['name'] == "categorie" || $attributes['name'] == "sub_categorie" || $attributes['name'] == "context") {
+												echo "<span id=".'schrinkMe'. $attributes['name'] . esc_attr( $row[ $this->sql['field_id'] ])." class='shrinkable'>".str_replace(";;", ";", $row_value)."</span>";
+											}
+											else {
+												echo $row_value;
+											}
 											?>
 											</span>
 										<?php if ( $first_field ) { ?>
@@ -4658,7 +4740,12 @@ class PodsUI {
 		if ( false !== $this->callback( 'pagination', $header ) ) {
 			return null;
 		}
-
+		if($this->pod->pod == 'onderwerp') {
+			$this->limit = 500;
+		}
+		if($this->pod->pod == 'sub_categorie' || $this->pod->pod == 'risico') {
+			$this->limit = 200;
+		}
 		$total_pages = ceil( $this->total_found / $this->limit );
 		$request_uri = pods_query_arg(
 			array( 'pg' . $this->num => '' ), array(
