@@ -268,7 +268,7 @@ class PodsUI {
 	/**
 	 * @var int
 	 */
-	public $limit = 100;
+	public $limit = 25;
 
 	/**
 	 * @var int
@@ -3769,7 +3769,7 @@ class PodsUI {
 		<style type="text/css">
 		<?php
 			 if($_GET['page'] == 'pods-manage-context' || $_GET['page'] == 'pods-manage-functie_website') {
-                    echo "th.manage-column.column-Toelichting, td.pods-ui-col-field-toelichting {
+				echo "th.manage-column.column-Toelichting, td.pods-ui-col-field-toelichting {
                     width: 500px;
                 }
                 th.manage-column.column-Volgorde {
@@ -3828,16 +3828,16 @@ class PodsUI {
         <script type="text/javascript">
 
 		<?php if($_GET['page'] == 'pods-manage-resource') { ?>
-			jQuery(document).ready(function(){
+			/*jQuery(document).ready(function(){
 
                 jQuery('html, body').animate({
                     scrollTop: jQuery('#the-list').offset().top - 80
                 }, 500);
 
-            });
+            });*/
 		<?php } ?>
 
-            function docReady(fn) {
+            /*function docReady(fn) {
                 // see if DOM is already available
                 if (document.readyState === "complete" || document.readyState === "interactive") {
                     // call on next available tick
@@ -3860,12 +3860,12 @@ class PodsUI {
 
             docReady(function() {
                 // DOM is loaded and ready for manipulation here
-                /*var $table = jQuery('table#table-1');
+                /!*var $table = jQuery('table#table-1');
                 $table.floatThead({
                     top: function($table) {
                         return 30;
                     }
-                });*/
+                });*!/
 				jQuery('table').on('scroll', function() {
 					jQuery("table > *").width(jQuery("table").width() + jQuery("table").scrollLeft());
 				});
@@ -3894,7 +3894,7 @@ class PodsUI {
                         }
                     }
                 }
-            });
+            });*/
         </script>
 <?php
 		if ( true === $reorder && ! in_array( 'reorder', $this->actions_disabled ) && false !== $this->reorder['on'] ) {
@@ -4371,14 +4371,7 @@ class PodsUI {
 										<span>
 										<?php
 											/* Escaped above for non-HTML types */
-											if($attributes['name'] == "url") {
-												echo "<a href='".$row_value."' target='_blank'>".$row_value."</a>";
-											} else if ($attributes['name'] == "toelichting" || $attributes['name'] == "categorie" || $attributes['name'] == "sub_categorie" || $attributes['name'] == "context") {
-												echo "<span id=".'schrinkMe'. $attributes['name'] . esc_attr( $row[ $this->sql['field_id'] ])." class='shrinkable'>".str_replace(";;", ";", $row_value)."</span>";
-											}
-											else {
 												echo $row_value;
-											}
 											?>
 											</span>
 										<?php if ( $first_field ) { ?>
@@ -4740,12 +4733,7 @@ class PodsUI {
 		if ( false !== $this->callback( 'pagination', $header ) ) {
 			return null;
 		}
-		if($this->pod->pod == 'onderwerp') {
-			$this->limit = 500;
-		}
-		if($this->pod->pod == 'sub_categorie' || $this->pod->pod == 'risico') {
-			$this->limit = 200;
-		}
+
 		$total_pages = ceil( $this->total_found / $this->limit );
 		$request_uri = pods_query_arg(
 			array( 'pg' . $this->num => '' ), array(
